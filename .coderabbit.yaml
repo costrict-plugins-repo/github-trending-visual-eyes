@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Template React/Vite/TS + Supabase
+
+language: "pt-BR"
+tone_instructions: "Assertivo. Bugs, segurança e performance. pt-BR, hífens, sem em-dashes."
+# 68 chars
+
+early_access: false
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: true
+  high_level_summary: true
+  review_status: true
+  poem: false
+  sequence_diagrams: true
+  estimate_code_review_effort: true
+
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+
+  path_instructions:
+    - path: "src/**/*.{ts,tsx,js,jsx}"
+      instructions: |
+        TypeScript/React. Verificar:
+        - Sem uso de `any` sem justificativa.
+        - Hooks usados corretamente (dependências em useEffect, cleanup em subscriptions).
+        - Props com tipos explícitos, sem PropTypes implícitos.
+        - Não renderizar dados não sanitizados via dangerouslySetInnerHTML.
+        - Estados de erro e loading tratados explicitamente (não só happy path).
+
+    - path: "src/services/**"
+      instructions: |
+        Camada de serviço. Verificar:
+        - Chamadas de API com tratamento de erro explícito.
+        - Tokens/credenciais nunca logados ou expostos em respostas de erro.
+        - Retry com backoff em endpoints críticos.
+
+    - path: "supabase/**"
+      instructions: |
+        Supabase: RLS habilitado em todas as tabelas com dados de usuário, policies com
+        user_id = auth.uid(), migrations idempotentes, índices em colunas de filtro.
+        Nunca chamar supabase.auth.admin sem verificação de papel admin.
+
+    - path: ".github/workflows/**"
+      instructions: |
+        CI/CD: secrets via secrets.*, nunca hardcoded. Permissions mínimas. Actions
+        pinadas por SHA quando possível. Concurrency control pra evitar runs duplicados.
+
+    - path: "**/.env.example"
+      instructions: |
+        Apenas placeholders, NUNCA valores reais. Sem project-refs reais do Supabase.
+
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+    - "!**/*.lock"
+    - "!**/package-lock.json"
+    - "!**/pnpm-lock.yaml"
+    - "!**/*.snap"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.gif"
+    - "!**/*.ico"
+    - "!**/*.svg"
+    - "!**/*.webp"
+    - "!**/*.woff"
+    - "!**/*.woff2"
+    - "!**/*.ttf"
+    - "!**/*.pdf"
+    - "!.coderabbit.yaml"
+
+  tools:
+    gitleaks:
+      enabled: true
+    semgrep:
+      enabled: true
+    presidio:
+      enabled: true
+
+knowledge_base:
+  web_search:
+    enabled: true
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - ".github/copilot-instructions.md"
+      - "AGENTS.md"
+  learnings:
+    scope: "local"
+
+chat:
+  auto_reply: true
